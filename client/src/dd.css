@@ -1,0 +1,14 @@
+.dd:hover {
+    background-color: red !important;
+}
+area {
+    display: block;
+    background-color:pink !important;
+   }
+.csss {
+    fill: red ;
+}
+.csss:hover {
+    opacity: 0.7;
+    border: 2px solid black !important;
+}
