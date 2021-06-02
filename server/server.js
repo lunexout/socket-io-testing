@@ -1,48 +1,64 @@
 const express = require("./config/express.js"),
   mongoose = require("mongoose");
-// cron = require("node-cron");
 
-// Use env port or default
 
 const uri = require("../env.json");
 const port = 3001;
-//establish socket.io connection
+
 const app = express.init();
 const server = require("http").createServer(app);
 const io = require("socket.io")(server);
 
+
+
 io.of("/api/socket").on("connection", (socket) => {
   console.log("socket.io: User connected: ", socket.id);
+
+  socket.on('change billets', async ({item}) => {
+  })
 
   socket.on("disconnect", () => {
     console.log("socket.io: User disconnected: ", socket.id);
   });
 });
 
-//start the server
 server.listen(port, () => console.log(`Server now running on port ${port}!`));
-// const router = express.Router();
+
 const TicketSchema = require("./models/biletSchema");
 
-app.post("/getbillets", (req, res) => {
-  TicketSchema.find({}).then((r) => {
+
+const Reg = require('./routes/Reg')
+app.use('/registration', Reg);
+
+const Log = require('./routes/Log')
+app.use('/login', Log)
+
+
+app.post("/getbillets", async (req, res) => {
+  await TicketSchema.find({}).then((r) => {
     res.json({ data: r });
   });
 });
 
+const Reserv = require("./models/reservationSchema");
+
 app.post("/changeBiletStatus", async (req, res) => {
-  TicketSchema.findOne({id: req.body.item.id}).then(r => {
-    if(!r.name_id.length > 0) {
-      // TicketSchema.findOne({id: req.body.item.id}).then(r => {
-        TicketSchema.updateOne({id: req.body.item.id}, {name_id: req.body.id})
-      // })
-      res.json('daemata')
-    }else {
-      res.json('arsebobs')
+  Reserv({ 'id': req.body.item.id ,'name_id': req.body.id}).save(function(err, result){
+    if(err)
+        res.send(err);
+    else {
+        TicketSchema.findOne({id: req.body.item.id}).then((r) => {
+          r.status = 1;
+          r.name_id = req.body.id;
+          r.save();
+        });
+        console.log(result);
+        // req.session.user = result;
+        res.send({"code":200,"message":"Record inserted successfully"});
     }
-  })
 });
-//connect to db
+  
+});
 mongoose.connect(uri.BASE_URL, {
   useNewUrlParser: true,
   useCreateIndex: true,
@@ -64,6 +80,7 @@ connection.once("open", () => {
         const thought = {
           _id: change.documentKey._id,
           status: change.updateDescription.updatedFields.status,
+          name_id: change.updateDescription.updatedFields.name_id,
         };
         io.of("/api/socket").emit("newThought", thought);
         break;
@@ -75,25 +92,28 @@ connection.once("open", () => {
   });
 });
 
-//schedule deletion of thoughts at midnight
-// cron.schedule("0 0 0 * * *", async () => {
-//   await connection.collection("thoughts").drop();
 
-//   io.of("/api/socket").emit("thoughtsCleared");
-// });
-app.get('/create', (req,res) => {
+// app.get('/create', (req,res) => {
   
-for(let i = 0; i < 10; i ++){ 
+// for(let i = 0; i < 10; i ++){ 
 
-  tick = new TicketSchema({
-    id: i,
-    status: 0,
-    isReserved: false,
-    name_id: ''
-  })
-  tick.save()
-}
-res.json('success')
-})
+//   tick = new TicketSchema({
+//     id: i,
+//     status: 0,
+//     isReserved: false,
+//     name_id: ''
+//   })
+//   tick.save()
+// }
+// res.json('success')
+// })
+const biletSchema = require("./models/biletSchema");
+// app.get('/reservation', (req, res) => {
+//   let reserv = new Reserv({
+//     id: 0,
+//   })
+//   reserv.save();
+//   res.json('succ')
+// })
 
 connection.on("error", (error) => console.log("Error: " + error));
