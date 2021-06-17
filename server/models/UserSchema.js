@@ -15,11 +15,11 @@ const mongoose = require("mongoose");
 //   });
 
 const UserSchema = new mongoose.Schema({
-  personalNumber: {
-      type: String,
-      required: true,
-  },
   name: {
+    type: String,
+    required: true,
+  },
+  surname: {
     type: String,
     required: true,
   },
@@ -31,6 +31,7 @@ const UserSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  personalNumber: String,
   phone: String,
   picture: String,
   myBillets: [],

@@ -12,17 +12,14 @@ import d from './dd.svg'
 function App() {
   const [bilets, setBilets] = useState([]);
 
-  const setAdgili = (item) => {
+  const setAdgili = async (item) => {
     let id = localStorage.getItem("id")
-    axios.post("http://192.168.100.33:3001/changeBiletStatus", { item,id });
+    let result = await axios.post("http://192.168.100.22:3001/changeBiletStatus", { item,id })
+    alert(result.data)
   };
 
-  const chooseid = (id) => {
-    console.log(id);
-  }
-
   const changeStatus = (re) => {
-    setBilets(
+    setBilets( 
       (
         items //pass callback to the setter from useState
       ) =>
@@ -34,14 +31,13 @@ function App() {
         )
     );
   };
-
   useEffect(() => {
     const socket = io(`${URLs.socketURL}/socket`);
 
     socket.on("newThought", (thought) => {
       console.log(thought);
       changeStatus(thought);
-      // this.setState({ thoughts: [...this.state.thoughts, thought] });
+      // setState({ thoughts: [...state.thoughts, thought] });
     });
     // const socket = io(`http://localhost:3001/api/socket`);
 
@@ -49,8 +45,41 @@ function App() {
       console.log(thought);
       // setBilets(thought);
     });
+    const regData = {
+      name_ge: 'nameGeo',
+      surname_ge: 'surnameGeo',
+      name_en: 'nameEng',
+      surname_en: 'surnameEng',
+      birthday: '03/11/2021',
+      email: 'email@gmail.ru',
+      mobile: 'phone',
+      password: 'password',
+      password_confirmation: 'Password',
+      address: 'adress',
+      idnumber: '60349530459',
+      sex: 'male',
+      citizen: 1,
+      city: 1,
+      // checkBoxStatus: localStorage.getItem('checkBoxStatus') == 'false' ? false : true,
+    }
+    axios.post('http://test.servicege.net/api/register', {name_ge: 'nameGeo',
+    surname_ge: 'surnameGeo',
+    name_en: 'nameEng',
+    surname_en: 'surnameEng',
+    birthday: '03/11/2021',
+    email: 'email@gmail.ru',
+    mobile: 'phone',
+    password: 'password',
+    password_confirmation: 'Password',
+    address: 'adress',
+    idnumber: '60349530459',
+    sex: 'male',
+    citizen: 1,
+    city: 1,}).then(res => {
+      console.log(res);
+    })
 
-    axios.post("http://192.168.100.33:3001/getbillets").then((data) => {
+    axios.post("http://192.168.100.22:3001/getbillets").then((data) => {
       setBilets(data.data.data);
     });
   }, []);
@@ -58,15 +87,33 @@ function App() {
   return (
     <div className="App">
       <div style={{ display: "flex", padding: 20, margin: 10 }}>
+        {console.log(bilets)}
         {bilets.map((item) => {
           return (
             <>
-              {item.status == 1 && (
+              {item.status == 1 && localStorage.getItem('id') == item.name_id && (
                 <div
-                  onClick={() => setAdgili(item)}
+                  // onClick={() => setAdgili(item)}
                   id={item._id}
                   style={{
-                    backgroundColor: "green",
+                    backgroundColor: "red",
+                    height: 20,
+                    width: 20,
+                    paddingLeft: 10,
+                    paddingRight: 10,
+                    marginLeft: 10,
+                    marginRight: 10,
+                  }}
+                >
+                  {item.status}
+                </div>
+              )}
+               {item.status == 1 && localStorage.getItem('id') != item.name_id && (
+                <div
+                  // onClick={() => setAdgili(item)}
+                  id={item._id}
+                  style={{
+                    backgroundColor: "yellow",
                     height: 20,
                     width: 20,
                     paddingLeft: 10,
@@ -95,29 +142,12 @@ function App() {
                 {item.status}
               </div>
               )}
-              {item.status == -1 && item.name_id != localStorage.getItem('id') && (
+              {item.status == -1 && (
                 <div
                   // onClick={() => setAdgili(item)}
                   id={item._id}
                   style={{
                     backgroundColor: "blue",
-                    height: 20,
-                    width: 20,
-                    paddingLeft: 10,
-                    paddingRight: 10,
-                    marginLeft: 10,
-                    marginRight: 10,
-                  }}
-                >
-                  {item.status}
-                </div>
-              )}
-              {item.status == -1 && item.name_id == localStorage.getItem('id')  && (
-                <div
-                  onClick={() => setAdgili(item)}
-                  id={item._id}
-                  style={{
-                    backgroundColor: "red",
                     height: 20,
                     width: 20,
                     paddingLeft: 10,
@@ -367,6 +397,7 @@ function App() {
          <circle cx="640" cy="320" r="10" storke="black" fill="green"></circle>
          <circle cx="670" cy="320" r="10" storke="black" fill="green"></circle>
       </svg> */}
+      {/* <button onClick={setDefault}>set default statuts</button> */}
       </div>
     </div>
   );

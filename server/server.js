@@ -1,21 +1,17 @@
 const express = require("./config/express.js"),
   mongoose = require("mongoose");
 
-
 const uri = require("../env.json");
-const port = 3001;
+const port = 3005;
 
 const app = express.init();
 const server = require("http").createServer(app);
 const io = require("socket.io")(server);
 
-
-
 io.of("/api/socket").on("connection", (socket) => {
   console.log("socket.io: User connected: ", socket.id);
 
-  socket.on('change billets', async ({item}) => {
-  })
+  socket.on("change billets", async ({ item }) => {});
 
   socket.on("disconnect", () => {
     console.log("socket.io: User disconnected: ", socket.id);
@@ -26,12 +22,16 @@ server.listen(port, () => console.log(`Server now running on port ${port}!`));
 
 const TicketSchema = require("./models/biletSchema");
 
+const Reg = require("./routes/Auth/Reg");
+app.use("/registration", Reg);
 
-const Reg = require('./routes/Reg')
-app.use('/registration', Reg);
+const Log = require("./routes/Auth/Log");
+app.use("/login", Log);
 
-const Log = require('./routes/Log')
-app.use('/login', Log)
+const Events = require("./routes/Events/Events");
+app.use("/events", Events);
+
+
 
 
 app.post("/getbillets", async (req, res) => {
@@ -53,12 +53,39 @@ app.post("/changeBiletStatus", async (req, res) => {
           r.save();
         });
         console.log(result);
-        // req.session.user = result;
         res.send({"code":200,"message":"Record inserted successfully"});
     }
+  })
+  // try {
+  //   const resp = await TicketSchema.findOne({
+  //     id: req.body.item.id,
+  //     name_id: "",
+  //   });
+
+  //   if (resp) {
+  //     await TicketSchema.updateOne(
+  //       {
+  //         id: req.body.item.id,
+  //       },
+  //       {
+  //         $set: {
+  //           name_id: req.body.id,
+  //           status: 1,
+  //         },
+  //       }
+  //     );
+  //     // resp.name_id = req.body.id;
+  //     // resp.status = 1;
+  //     // resp.save();
+  //     res.json({ msg: "success" });
+  //   } else {
+  //     res.json({ msg: "error " });
+  //   }
+  // } catch (error) {
+  //   throw error;
+  // }
 });
-  
-});
+
 mongoose.connect(uri.BASE_URL, {
   useNewUrlParser: true,
   useCreateIndex: true,
@@ -92,21 +119,18 @@ connection.once("open", () => {
   });
 });
 
-
-// app.get('/create', (req,res) => {
-  
-// for(let i = 0; i < 10; i ++){ 
-
-//   tick = new TicketSchema({
-//     id: i,
-//     status: 0,
-//     isReserved: false,
-//     name_id: ''
-//   })
-//   tick.save()
-// }
-// res.json('success')
-// })
+app.get("/create", (req, res) => {
+  for (let i = 0; i < 10; i++) {
+    tick = new TicketSchema({
+      id: i,
+      status: 0,
+      isReserved: false,
+      name_id: "",
+    });
+    tick.save();
+  }
+  res.json("success");
+});
 const biletSchema = require("./models/biletSchema");
 // app.get('/reservation', (req, res) => {
 //   let reserv = new Reserv({
