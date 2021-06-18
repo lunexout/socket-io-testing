@@ -14,11 +14,13 @@ const SportEvent = new mongoose.Schema({
     descriptionGeo: String,
     descriptionEng: String,
     descriptionRu: String,
-    location: String,
+    locationGeo: String,
+    locationEng: String,
+    locationRu: String,
     adressGeo: String,
     adressEng: String,
     adressRu: String,
-    price: String,
+    price: Number,
     status: Boolean,
 });
 const TopEvent = new mongoose.Schema({
@@ -35,7 +37,7 @@ const TopEvent = new mongoose.Schema({
 
 const EventSchema = new mongoose.Schema({
     topEvents: [TopEvent],
-    sportEvents: [SportEvent]
+    sportEvents: [SportEvent],
 });
 
 module.exports = mongoose.model("events", EventSchema);
